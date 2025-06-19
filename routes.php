@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 $url = isset($_GET['url']) ? trim($_GET['url'], '/') : '';
 $segments = explode('/', $url);
