@@ -3,6 +3,7 @@ class ProductController {
     private function isAdmin() {
         return isset($_SESSION['user_rol']) && $_SESSION['user_rol'] === 'admin';
     }
+
     public function adminList() {
         if (!$this->isAdmin()) {
             header('Location: index.php'); exit;
@@ -11,6 +12,7 @@ class ProductController {
         $productos = $product->getAll();
         require 'views/products/list.php';
     }
+
     public function create() {
         if (!$this->isAdmin()) {
             header('Location: index.php'); exit;
@@ -18,11 +20,17 @@ class ProductController {
         $category = new Category();
         $categorias = $category->getAll();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
             $nombre = trim($_POST['nombre']);
             $precio = floatval($_POST['precio']);
             $descripcion = trim($_POST['descripcion']);
             $category_id = intval($_POST['category_id']);
             $stock = min(10, max(1, intval($_POST['stock'])));
+
+            // Validaciones para evitar valores negativos
+            if ($precio < 0) $precio = 0;
+            if ($stock < 1) $stock = 1;
+
             $imagen = '';
             if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
                 $nombreImg = uniqid() . '_' . basename($_FILES['imagen']['name']);
@@ -38,6 +46,7 @@ class ProductController {
         }
         require 'views/products/form.php';
     }
+
     public function edit() {
         if (!$this->isAdmin()) {
             header('Location: index.php'); exit;
@@ -59,6 +68,11 @@ class ProductController {
             $descripcion = trim($_POST['descripcion']);
             $category_id = intval($_POST['category_id']);
             $stock = min(10, max(1, intval($_POST['stock'])));
+
+            // Validaciones para evitar valores negativos
+            if ($precio < 0) $precio = 0;
+            if ($stock < 1) $stock = 1;
+
             $imagen = $prod['imagen'];
             if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
                 $nombreImg = uniqid() . '_' . basename($_FILES['imagen']['name']);
@@ -73,6 +87,7 @@ class ProductController {
         }
         require 'views/products/form.php';
     }
+
     public function delete() {
         if (!$this->isAdmin()) {
             header('Location: index.php'); exit;
@@ -83,6 +98,7 @@ class ProductController {
         }
         header('Location: index.php?controller=ProductController&action=adminList'); exit;
     }
+
     public function byCategory() {
         if (!isset($_GET['id'])) {
             header('Location: index.php?controller=ProductController&action=adminList'); exit;
@@ -94,6 +110,7 @@ class ProductController {
         $cat = $categoryModel->getById($category_id);
         require 'views/products/by_category.php';
     }
+
     public function detail() {
         if (!isset($_GET['id'])) {
             header('Location: index.php'); exit;
@@ -106,7 +123,8 @@ class ProductController {
         }
         require 'views/products/detail.php';
     }
+
     public function publicList() {
         require 'views/products/public_list.php';
     }
-} 
+}

@@ -19,14 +19,16 @@
             <label for="email" class="form-label">Correo electrónico</label>
             <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($usuario['email']); ?>" required>
         </div>
-        <div class="mb-3">
+
+        <!-- <div class="mb-3">
             <label for="direccion" class="form-label">Dirección</label>
             <input type="text" class="form-control" id="direccion" name="direccion" value="<?php echo htmlspecialchars($usuario['direccion']); ?>">
-        </div>
-        <div class="mb-3">
+        </div> -->
+        <!-- <div class="mb-3">
             <label for="pais" class="form-label">País</label>
             <input type="text" class="form-control" id="pais" name="pais" value="<?php echo htmlspecialchars($usuario['pais']); ?>">
-        </div>
+        </div> -->
+
         <div class="mb-3">
             <label for="ciudad" class="form-label">Ciudad</label>
             <input type="text" class="form-control" id="ciudad" name="ciudad" value="<?php echo htmlspecialchars($usuario['ciudad']); ?>">
