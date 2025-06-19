@@ -3,6 +3,7 @@
 session_start();
 
 require_once 'config.php';
+require_once 'routes.php';  
 
 // Autocarga de controladores y modelos
 spl_autoload_register(function ($class) {
