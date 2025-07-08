@@ -5,6 +5,27 @@
 <?php include 'views/layouts/header.php'; ?>
 <div class="container-fluid mt-4 main-content">
     <h2 class="mb-4">Administración de Pedidos</h2>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?php 
+            echo htmlspecialchars($_SESSION['success']);
+            unset($_SESSION['success']);
+            ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?php 
+            echo htmlspecialchars($_SESSION['error']);
+            unset($_SESSION['error']);
+            ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
     <?php if (empty($pedidos)): ?>
         <div class="alert alert-info">No hay pedidos registrados.</div>
     <?php else: ?>
@@ -74,7 +95,7 @@
                                 <p class="mb-1 small"><strong>Pago:</strong> <?php echo htmlspecialchars($pedido['metodo_pago']); ?></p>
                             </div>
 
-                            <div class="mt-3">
+                            <div class="mt-3 d-flex justify-content-between align-items-center">
                                 <form method="post" action="index.php?controller=OrderController&action=updateStatus" class="d-inline">
                                     <input type="hidden" name="order_id" value="<?php echo $pedido['id']; ?>">
                                     <select name="estado" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
@@ -83,6 +104,44 @@
                                         <option value="entregado" <?php echo $pedido['estado'] == 'entregado' ? 'selected' : ''; ?>>Entregado</option>
                                     </select>
                                 </form>
+
+                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal<?php echo $pedido['id']; ?>">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+
+                                <!-- Modal de confirmación para eliminar -->
+                                <div class="modal fade" id="deleteModal<?php echo $pedido['id']; ?>" tabindex="-1" aria-labelledby="deleteModalLabel<?php echo $pedido['id']; ?>" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteModalLabel<?php echo $pedido['id']; ?>">Confirmar eliminación</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>¿Estás seguro de que deseas eliminar el pedido #<?php echo htmlspecialchars($pedido['id']); ?>?</p>
+                                                <?php if ($pedido['estado'] === 'pendiente'): ?>
+                                                    <div class="alert alert-warning">
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                        Este pedido está pendiente. Al eliminarlo, se restaurará el stock de los productos.
+                                                    </div>
+                                                <?php endif; ?>
+                                                <div class="alert alert-danger">
+                                                    <i class="fas fa-exclamation-circle"></i>
+                                                    Esta acción no se puede deshacer.
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <form method="post" action="index.php?controller=OrderController&action=delete" class="d-inline">
+                                                    <input type="hidden" name="order_id" value="<?php echo $pedido['id']; ?>">
+                                                    <button type="submit" class="btn btn-danger">
+                                                        <i class="fas fa-trash"></i> Sí, eliminar pedido
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -128,5 +187,6 @@
 
 <?php include 'views/layouts/footer.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html> 

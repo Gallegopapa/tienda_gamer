@@ -3,6 +3,7 @@ class CategoryController {
     private function isAdmin() {
         return isset($_SESSION['user_rol']) && $_SESSION['user_rol'] === 'admin';
     }
+
     public function list() {
         if (!$this->isAdmin()) {
             header('Location: index.php');
@@ -12,6 +13,7 @@ class CategoryController {
         $categorias = $category->getAll();
         require 'views/categories/list.php';
     }
+
     public function create() {
         if (!$this->isAdmin()) {
             header('Location: index.php');
@@ -29,14 +31,16 @@ class CategoryController {
             if ($category->create($nombre)) {
                 $cat_id = $category->getLastInsertId();
                 if ($imagen) $category->updateImage($cat_id, $imagen);
+                $_SESSION['success'] = "Categoría creada exitosamente.";
                 header('Location: index.php?controller=CategoryController&action=list');
                 exit;
             } else {
-                $error = 'Error al crear la categoría.';
+                $_SESSION['error'] = 'Error al crear la categoría.';
             }
         }
         require 'views/categories/form.php';
     }
+
     public function edit() {
         if (!$this->isAdmin()) {
             header('Location: index.php');
@@ -63,35 +67,62 @@ class CategoryController {
                 $category->updateImage($id, $imagen);
             }
             if ($category->update($id, $nombre)) {
+                $_SESSION['success'] = "Categoría actualizada exitosamente.";
                 header('Location: index.php?controller=CategoryController&action=list');
                 exit;
             } else {
-                $error = 'Error al actualizar la categoría.';
+                $_SESSION['error'] = 'Error al actualizar la categoría.';
             }
         }
         require 'views/categories/form.php';
     }
+
     public function delete() {
         if (!$this->isAdmin()) {
             header('Location: index.php');
             exit;
         }
+        
         if (isset($_GET['id'])) {
-            $category = new Category();
-            $category->delete(intval($_GET['id']));
+            try {
+                $category = new Category();
+                $id = intval($_GET['id']);
+                
+                // Verificar si la categoría existe
+                $cat = $category->getById($id);
+                if (!$cat) {
+                    throw new Exception("La categoría no existe.");
+                }
+                
+                if ($category->delete($id)) {
+                    $_SESSION['success'] = "Categoría eliminada exitosamente.";
+                } else {
+                    throw new Exception("Error al eliminar la categoría.");
+                }
+            } catch (Exception $e) {
+                $_SESSION['error'] = $e->getMessage();
+            }
+        } else {
+            $_SESSION['error'] = "ID de categoría no proporcionado.";
         }
+        
         header('Location: index.php?controller=CategoryController&action=list');
         exit;
     }
+
     public function show() {
         if (!isset($_GET['id'])) {
-            header('Location: index.php'); exit;
+            header('Location: index.php'); 
+            exit;
         }
+        
         $category = new Category();
         $cat = $category->getById(intval($_GET['id']));
         if (!$cat) {
-            header('Location: index.php'); exit;
+            header('Location: index.php'); 
+            exit;
         }
+        
         $product = new Product();
         $productos = $product->getByCategory($cat['id']);
         require 'views/categories/show.php';

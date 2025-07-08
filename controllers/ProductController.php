@@ -20,15 +20,20 @@ class ProductController {
         $category = new Category();
         $categorias = $category->getAll();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
             $nombre = trim($_POST['nombre']);
             $precio = floatval($_POST['precio']);
             $descripcion = trim($_POST['descripcion']);
             $category_id = intval($_POST['category_id']);
             $stock = min(10, max(1, intval($_POST['stock'])));
 
-            // Validaciones para evitar valores negativos
-            if ($precio < 0) $precio = 0;
+            // Validación de precio negativo
+            if ($precio < 0) {
+                $_SESSION['error'] = 'El precio no puede ser negativo.';
+                require 'views/products/form.php';
+                return;
+            }
+
+            // Validación de stock
             if ($stock < 1) $stock = 1;
 
             $imagen = '';
@@ -39,9 +44,11 @@ class ProductController {
             }
             $product = new Product();
             if ($product->create($nombre, $precio, $descripcion, $imagen, $category_id, $stock)) {
-                header('Location: index.php?controller=ProductController&action=adminList'); exit;
+                $_SESSION['success'] = 'Producto creado exitosamente.';
+                header('Location: index.php?controller=ProductController&action=adminList'); 
+                exit;
             } else {
-                $error = 'Error al crear el producto.';
+                $_SESSION['error'] = 'Error al crear el producto.';
             }
         }
         require 'views/products/form.php';
@@ -69,8 +76,14 @@ class ProductController {
             $category_id = intval($_POST['category_id']);
             $stock = min(10, max(1, intval($_POST['stock'])));
 
-            // Validaciones para evitar valores negativos
-            if ($precio < 0) $precio = 0;
+            // Validación de precio negativo
+            if ($precio < 0) {
+                $_SESSION['error'] = 'El precio no puede ser negativo.';
+                require 'views/products/form.php';
+                return;
+            }
+
+            // Validación de stock
             if ($stock < 1) $stock = 1;
 
             $imagen = $prod['imagen'];
@@ -80,9 +93,11 @@ class ProductController {
                 $imagen = $nombreImg;
             }
             if ($product->update($id, $nombre, $precio, $descripcion, $imagen, $category_id, $stock)) {
-                header('Location: index.php?controller=ProductController&action=adminList'); exit;
+                $_SESSION['success'] = 'Producto actualizado exitosamente.';
+                header('Location: index.php?controller=ProductController&action=adminList'); 
+                exit;
             } else {
-                $error = 'Error al actualizar el producto.';
+                $_SESSION['error'] = 'Error al actualizar el producto.';
             }
         }
         require 'views/products/form.php';
@@ -90,13 +105,29 @@ class ProductController {
 
     public function delete() {
         if (!$this->isAdmin()) {
-            header('Location: index.php'); exit;
+            header('Location: index.php'); 
+            exit;
         }
+
         if (isset($_GET['id'])) {
-            $product = new Product();
-            $product->delete(intval($_GET['id']));
+            try {
+                $product = new Product();
+                $id = intval($_GET['id']);
+
+                if ($product->delete($id)) {
+                    $_SESSION['success'] = "Producto eliminado exitosamente.";
+                } else {
+                    $_SESSION['error'] = "Error al eliminar el producto.";
+                }
+            } catch (Exception $e) {
+                $_SESSION['error'] = $e->getMessage();
+            }
+        } else {
+            $_SESSION['error'] = "ID de producto no proporcionado.";
         }
-        header('Location: index.php?controller=ProductController&action=adminList'); exit;
+
+        header('Location: index.php?controller=ProductController&action=adminList'); 
+        exit;
     }
 
     public function byCategory() {
@@ -121,6 +152,8 @@ class ProductController {
         if (!$prod) {
             header('Location: index.php'); exit;
         }
+        // Obtener productos sugeridos
+        $sugerencias = $product->getSugerencias($id);
         require 'views/products/detail.php';
     }
 
