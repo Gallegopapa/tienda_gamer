@@ -5,7 +5,7 @@
 CREATE DATABASE IF NOT EXISTS tienda_gamer;
 USE tienda_gamer;
 
--- Tabla de usuarios
+-- 1. Tabla de usuarios (sin dependencias)
 CREATE TABLE IF NOT EXISTS users (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
     UNIQUE KEY email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla de categorías
+-- 2. Tabla de categorías (sin dependencias)
 CREATE TABLE IF NOT EXISTS categories (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS categories (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla de productos
+-- 3. Tabla de productos (depende de categories)
 CREATE TABLE IF NOT EXISTS products (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS products (
     FOREIGN KEY (category_id) REFERENCES categories(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla de pedidos
+-- 4. Tabla de pedidos (depende de users)
 CREATE TABLE IF NOT EXISTS orders (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     user_id INT(11) NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS orders (
     FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla de items de pedido
+-- 5. Tabla de items de pedido (depende de orders y products)
 CREATE TABLE IF NOT EXISTS order_items (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     order_id INT(11) NOT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS order_items (
     FOREIGN KEY (product_id) REFERENCES products(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla de productos en pedidos
+-- 6. Tabla de productos en pedidos (depende de orders y products)
 CREATE TABLE IF NOT EXISTS order_products (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     order_id INT(11) NOT NULL,
