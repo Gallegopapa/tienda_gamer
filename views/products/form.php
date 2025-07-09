@@ -5,8 +5,8 @@
 <?php include 'views/layouts/header.php'; ?>
 <div class="container mt-5 main-content" style="max-width: 600px;">
     <h2 class="mb-4"><?php echo isset($prod) ? 'Editar Producto' : 'Nuevo Producto'; ?></h2>
-    <?php if (isset($error)): ?>
-        <div class="alert alert-danger"><?php echo $error; ?></div>
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-danger"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></div>
     <?php endif; ?>
     <form method="post" enctype="multipart/form-data" action="<?php echo isset($prod) ? 'index.php?controller=ProductController&action=edit&id=' . $prod['id'] : 'index.php?controller=ProductController&action=create'; ?>">
         <div class="mb-3">
@@ -15,7 +15,7 @@
         </div>
         <div class="mb-3">
             <label for="precio" class="form-label">Precio</label>
-            <input type="number" step="0.01" class="form-control" id="precio" name="precio" required value="<?php echo isset($prod) ? $prod['precio'] : ''; ?>">
+            <input type="number" step="0.01" min="0" class="form-control" id="precio" name="precio" required value="<?php echo isset($prod) ? $prod['precio'] : ''; ?>">
         </div>
         <div class="mb-3">
             <label for="category_id" class="form-label">Categoría</label>
